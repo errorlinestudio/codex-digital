@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Effet de frappe - Codex Digital</title>
+<style>
+  body {
+    font-family: monospace;
+    background: #222;
+    color: #0f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  nav {
+    margin-bottom: 20px;
+  }
+
+  nav a {
+    color: #0f0;
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+
+  #texte {
+    width: 95vw;
+    height: 70vh;
+    background: #111;
+    border: 2px solid #0f0;
+    padding: 20px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-size: 1.2em;
+    color: var(--couleurTexte, #0f0);
+  }
+
+  #progressContainer {
+    width: 95vw;
+    background: #333;
+    height: 8px;
+    margin-top: 10px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  #progressBar {
+    height: 100%;
+    width: 0;
+    background: #0f0;
+    transition: width 0.2s ease;
+  }
+
+  #buttons {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  button {
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  #demarrer { background: #0077ff; color: white;}
+  #pause { background: #ff9900; color: white;}
+  #reprendre { background: #00cc44; color: white;}
+  #recommencer { background: #cc0055; color: white;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Acceuil</a>
+  <a href="frappe.html">Codex Digital</a>
+</nav>
+
+<h2 style="color: var(--couleurTitre, #0f0);">Codex Digital</h2>
+
+<div id="texte"></div>
+
+<div id="progressContainer"><div id="progressBar"></div></div>
+
+<div id="buttons">
+  <button id="demarrer">Démarrer la frappe</button>
+  <button id="pause" disabled>Pause</button>
+  <button id="reprendre" disabled>Reprendre</button>
+  <button id="recommencer" disabled>Recommencer</button>
+</div>
+
+<audio id="sonTouche" src="touche.mp3" preload="auto"></audio>
+
+<script>
+  const zoneTexte = document.getElementById('texte');
+  const progressBar = document.getElementById('progressBar');
+  const btnDemarrer = document.getElementById('demarrer');
+  const btnPause = document.getElementById('pause');
+  const btnReprendre = document.getElementById('reprendre');
+  const btnRecommencer = document.getElementById('recommencer');
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const texte = urlParams.get('texte') || "Pas de texte reçu.";
+  const vitesse = parseInt(urlParams.get('vitesse'), 10) || 50;
+  const couleurTexte = urlParams.get('couleurTexte') || '#0f0';
+
+  zoneTexte.style.color = couleurTexte;
+  document.body.style.setProperty('--couleurTexte', couleurTexte);
+
+  let index = 0, timerId = null, enPause = false, enCours = false;
+  const sonTouche = document.getElementById('sonTouche');
+
+  function updateButtons() {
+    btnDemarrer.disabled = enCours;
+    btnPause.disabled = !enCours || enPause;
+    btnReprendre.disabled = !enPause;
+    btnRecommencer.disabled = index === 0 && !enCours;
+  }
+
+  function taper() {
+    if (enPause || !enCours) return;
+    if (index < texte.length) {
+      zoneTexte.textContent += texte.charAt(index++);
+      zoneTexte.scrollTop = zoneTexte.scrollHeight;
+      progressBar.style.width = (index / texte.length) * 100 + '%';
+      timerId = setTimeout(taper, vitesse);
+    } else {
+      enCours = false;
+      sonTouche.pause();
+      sonTouche.currentTime = 0;
+      updateButtons();
+    }
+  }
+
+  function demarrer() {
+    if (enCours) return;
+    index = 0;
+    zoneTexte.textContent = "";
+    progressBar.style.width = "0%";
+    enPause = false;
+    enCours = true;
+    sonTouche.loop = true;
+    sonTouche.play();
+    updateButtons();
+    taper();
+  }
+
+  function pause() {
+    if (!enCours || enPause) return;
+    enPause = true;
+    clearTimeout(timerId);
+    sonTouche.pause();
+    updateButtons();
+  }
+
+  function reprendre() {
+    if (!enCours || !enPause) return;
+    enPause = false;
+    sonTouche.play();
+    updateButtons();
+    taper();
+  }
+
+  function recommencer() {
+    clearTimeout(timerId);
+    sonTouche.pause();
+    sonTouche.currentTime = 0;
+    index = 0;
+    zoneTexte.textContent = "";
+    progressBar.style.width = "0%";
+    enPause = false;
+    enCours = true;
+    sonTouche.loop = true;
+    sonTouche.play();
+    updateButtons();
+    taper();
+  }
+
+  btnDemarrer.addEventListener('click', demarrer);
+  btnPause.addEventListener('click', pause);
+  btnReprendre.addEventListener('click', reprendre);
+  btnRecommencer.addEventListener('click', recommencer);
+  updateButtons();
+</script>
+
+</body>
+</html>
