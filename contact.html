@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Contact - Codex Digital</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap');
+
+  body {
+    font-family: 'Fira Mono', monospace;
+    background: #121a12;
+    color: #0f0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  nav {
+    align-self: center;
+    margin-bottom: 20px;
+  }
+
+  nav a {
+    color: #0f0;
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+
+  main {
+    background: #1a2a1a;
+    border: 2px solid #0f0;
+    border-radius: 16px;
+    padding: 30px 40px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 0 12px #0f0aa6a2;
+    align-self: center;
+  }
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  label {
+    display: block;
+    margin: 18px 0 8px 0;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  textarea {
+    width: 100%;
+    font-family: 'Fira Mono', monospace;
+    font-size: 1.1rem;
+    background: #0a190a;
+    color: #0f0;
+    border: 2px solid #0f0;
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  textarea {
+    height: 120px;
+    resize: vertical;
+  }
+
+  button {
+    margin-top: 28px;
+    background: linear-gradient(45deg, #0f0, #0a0);
+    color: #121a12;
+    border: none;
+    padding: 14px 28px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  footer {
+    text-align: center;
+    padding: 1rem;
+    color: #888;
+    align-self: center;
+  }
+  
+  .form-group {
+  margin-bottom: 20px;
+}
+
+/* Effets modernes sur les champs */
+form input,
+form textarea {
+  width: 100%;
+  font-family: 'Fira Mono', monospace;
+  font-size: 1.1rem;
+  background: #0a190a;
+  color: #0f0;
+  border: 2px solid #0f0;
+  border-radius: 8px;
+  padding: 12px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+form input:focus,
+form textarea:focus {
+  outline: none;
+  border-color: #7fff7f;
+  box-shadow: 0 0 8px #7fff7f;
+}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Accueil</a>
+  <a href="frappe.html">Codex Digital</a>
+  <a href="contact.html">Contact</a>
+</nav>
+
+<main>
+  </section>
+
+  <section id="contact">
+    <h2>✉️ Contact</h2>
+<form id="contactForm" autocomplete="off">
+  <div class="form-group">
+    <input type="text" name="name" placeholder="Nom" required />
+  </div>
+
+  <div class="form-group">
+    <input type="email" name="email" placeholder="Adresse Email" required />
+  </div>
+
+  <div class="form-group">
+    <textarea name="message" rows="5" placeholder="Message ..." required></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="captchaAnswer">Résolvez le captcha pour envoyer votre message.</label>
+    <div style="text-align: center; margin-bottom: 0.5rem;">
+      (<span id="captchaNum1"></span> + <span id="captchaNum2"></span> ?)
+    </div>
+    <input
+      type="text"
+      id="captchaAnswer"
+      name="captchaAnswer"
+      placeholder="Réponse"
+      required
+      autocomplete="off"
+    />
+  </div>
+
+  <button type="submit">Envoyer</button>
+  <div id="alertMsg"></div>
+</form>
+
+  </section>
+</main>
+
+<footer>
+  <p>&copy; 2025 Codex Digital. Tous droits réservés. Le code source de ce site n'est pas libre de droits.</p>
+  <p>Site produit par &copy; Ridley HICKS &copy; Error Line Studio &amp; &copy; NOXDOG PRODUCTION</p>
+</footer>
+
+<script>
+  function envoyerMessage(event) {
+    event.preventDefault();
+    alert("Merci pour ton message ! (formulaire non connecté à une base de données)");
+    document.querySelector('form').reset();
+  }
+</script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const webhookURL = "https://discordapp.com/api/webhooks/1401691899521142927/IP5H0mXIxJRmKxlFTaqHWnWtikRY6lfNoQdJLhVkw8ukBaSRQ3C12KBLnPH2wFk4RrcZ";
+    const form = document.getElementById("contactForm");
+    const alertMsg = document.getElementById("alertMsg");
+    const submitBtn = form.querySelector("button[type='submit']");
+    const captchaNum1El = document.getElementById("captchaNum1");
+    const captchaNum2El = document.getElementById("captchaNum2");
+
+    const delayBetweenSends = 30000; // 30 secondes
+    let canSend = true;
+
+    let num1, num2;
+
+    function generateCaptcha() {
+      num1 = Math.floor(Math.random() * 10) + 1;
+      num2 = Math.floor(Math.random() * 10) + 1;
+      captchaNum1El.textContent = num1;
+      captchaNum2El.textContent = num2;
+    }
+
+    generateCaptcha();
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!canSend) {
+        alertMsg.style.color = "#f08080";
+        alertMsg.textContent = "Merci d'attendre 30 secondes entre chaque message.";
+        return;
+      }
+
+      alertMsg.textContent = "";
+      alertMsg.style.color = "#8fbc8f";
+
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const message = form.message.value.trim();
+      const captchaAnswer = form.captchaAnswer.value.trim();
+
+      if (!name || !email || !message) {
+        alertMsg.style.color = "#f08080";
+        alertMsg.textContent = "Merci de remplir tous les champs !";
+        return;
+      }
+
+      if (parseInt(captchaAnswer, 10) !== num1 + num2) {
+        alertMsg.style.color = "#f08080";
+        alertMsg.textContent = "Réponse au captcha incorrecte.";
+        generateCaptcha();
+        form.captchaAnswer.value = "";
+        form.captchaAnswer.focus();
+        return;
+      }
+
+      canSend = false;
+      submitBtn.disabled = true;
+
+      const payload = {
+        content: null,
+        embeds: [
+          {
+            title: "Codex Digital",
+            color: 3447003,
+            fields: [
+              { name: "Nom/Pseudo Xbox", value: name },
+              { name: "Email", value: email },
+              { name: "Message", value: message }
+            ],
+            timestamp: new Date().toISOString()
+          }
+        ]
+      };
+
+      try {
+        const response = await fetch(webhookURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          alertMsg.style.color = "#8fbc8f";
+          alertMsg.textContent = "Message envoyé avec succès. Merci !";
+          form.reset();
+          generateCaptcha();
+
+          // Bloquer l'envoi pendant 30 secondes
+          setTimeout(() => {
+            canSend = true;
+            submitBtn.disabled = false;
+            alertMsg.textContent = "";
+          }, delayBetweenSends);
+        } else {
+          throw new Error("Erreur lors de l'envoi du message.");
+        }
+      } catch (error) {
+        alertMsg.style.color = "#f08080";
+        alertMsg.textContent = "Une erreur est survenue, veuillez réessayer plus tard.";
+        canSend = true;
+        submitBtn.disabled = false;
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
